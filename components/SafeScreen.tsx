@@ -6,7 +6,7 @@ export default function SafeScreen({children}: {children : React.ReactNode}) {
     const insets = useSafeAreaInsets()
 
   return (
-  <View style={{paddingTop: insets.top, flex: 1, backgroundColor: '#93DA97'}}>
+  <View style={{paddingTop: insets.top, flex: 1, backgroundColor: '#E8FFD7'}}>
       {children}
     </View>
   )

@@ -1,86 +1,102 @@
-import { useSignUp } from '@clerk/clerk-expo';
+import { isClerkAPIResponseError, useSignUp } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function SignUpScreen() {
-  const { isLoaded, signUp, setActive } = useSignUp()
-  const router = useRouter()
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [pendingVerification, setPendingVerification] = React.useState(false)
-  const [code, setCode] = React.useState('')
+  const [emailAddress, setEmailAddress] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [pendingVerification, setPendingVerification] = React.useState(false);
+  const [code, setCode] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  // Handle submission of sign-up form
-  const onSignUpPress = async () => {
-    if (!isLoaded) return
-
-    // Start sign-up process using email and password provided
-    try {
-      await signUp.create({
-        emailAddress,
-        password,
-      })
-
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true)
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
-    }
-  }
-
-  // Handle submission of verification form
-  const onVerifyPress = async () => {
-    if (!isLoaded) return
-
-    try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      })
-
-      // If verification was completed, set the session to active
-      // and redirect the user
-      if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/')
-      } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2))
+  const handleError = (err: unknown) => {
+    if (isClerkAPIResponseError(err)) {
+      switch (err.errors[0]?.code) {
+        case 'form_password_incorrect':
+          setError('Password is incorrect. Please try again.');
+          break;
+        case 'form_identifier_exists':
+          setError('Email already in use. Try signing in instead.');
+          break;
+        default:
+          setError(err.errors[0]?.longMessage || 'An error occurred. Please try again.');
       }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+    } else {
+      setError('An unexpected error occurred');
     }
-  }
+  };
+
+  const onSignUpPress = async () => {
+    if (!isLoaded) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await signUp.create({ emailAddress, password });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setPendingVerification(true);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (pendingVerification) {
     return (
-     <View className='bg-[#93DA97] flex-1 justify-center items-center'>
-        <Text className='text-3xl font-semibold text-[#3E5F44]'>Verify your email</Text>
+      <View className='bg-[#E8FFD7] flex-1 justify-center items-center p-6'>
+        <Text className='text-4xl font-medium text-[#3E5F44] mb-2'>Verify your email</Text>
+        <Text className='text-[#5E936C] text-lg mb-6'>We&apos;ve sent a code to {emailAddress}</Text>
+
+        {error && (
+          <View className="bg-red-100 p-3 rounded-lg mb-4 flex-row items-center">
+            <Text className="text-red-700 flex-1">{error}</Text>
+            <TouchableOpacity onPress={() => setError(null)}>
+              <Text className="text-red-700 font-bold ml-2">✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <TextInput
-          className="bg-[#E8FFD7] p-4 rounded-lg border border-gray-200 mt-4"
+          className="bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97] w-full"
           value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
+          placeholder="Enter 6-digit code"
+          onChangeText={setCode}
+          keyboardType="number-pad"
+          maxLength={6}
         />
-        <TouchableOpacity onPress={onVerifyPress} 
-          className='mt-4 bg-[#3E5F44] p-4 rounded-lg'
+
+        <TouchableOpacity 
+          onPress={async () => {
+            if (!isLoaded) return;
+            setIsLoading(true);
+            try {
+              const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
+              if (signUpAttempt.status === 'complete') {
+                await setActive({ session: signUpAttempt.createdSessionId });
+                router.replace('/');
+              }
+            } catch (err) {
+              handleError(err);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+          className='mt-6 bg-[#5E936C] p-4 rounded-lg w-full items-center'
+          disabled={isLoading || code.length < 6}
         >
-          <Text className='text-[#E8FFD7]'>Verify</Text>
+          <Text className='text-white text-lg'>
+            {isLoading ? 'Verifying...' : 'Verify Email'}
+          </Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   return (
@@ -92,23 +108,22 @@ export default function SignUpScreen() {
       extraScrollHeight={30}
    >
 
-       <View className='flex-1 bg-[#93DA97]  justify-center p-6'>
+       <View className='flex-1 bg-[#E8FFD7]  justify-center p-6'>
 
         <View className='items-center mb-8'>
           <Image 
             source={require('@/assets/images/signup.png')}
             className="w-52 h-52 mb-4"
           />
-          <Text className='text-3xl font-bold text-[#3E5F44]'>Create Account</Text>
-          <Text className='text-[#E8FFD7] mt-2'>Sign up to continue</Text>
+          <Text className='text-4xl font-bold text-[#3E5F44]'>Create Account</Text>
+          <Text className='text-[#5E936C] text-lg mt-1'>Sign up to continue</Text>
         </View>
 
         {/* Form */}
         <View className='space-y-4'>
           <View className='mt-3'>
-            <Text className='text-[#3E5F44] mb-1'>Email</Text>
             <TextInput 
-            className='bg-[#E8FFD7] p-4 rounded-lg border border-gray-200'
+            className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
             autoCapitalize="none"
             value={emailAddress}
             placeholder="Enter email"
@@ -117,28 +132,27 @@ export default function SignUpScreen() {
           />
         </View>
 
-        <View className='mt-3'>
-          <Text className='text-[#3E5F44] mb-1'>Password</Text>
+        <View className='mt-6'>
           <TextInput
-          className='bg-[#E8FFD7] p-4 rounded-lg border border-gray-200'
+          className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
           value={password}
-          placeholder="••••••••"
+          placeholder="Enter password"
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />
         </View>
 
         <TouchableOpacity onPress={onSignUpPress}
-        className='bg-[#3E5F44] p-4 rounded-lg items-center mt-4'
+        className='bg-[#5E936C] p-4 rounded-lg items-center mt-8'
         >
-          <Text className='text-[#E8FFD7] font-semibold'>Continue</Text>
+          <Text className='text-white text-lg'>Continue</Text>
         </TouchableOpacity>
         </View>
 
         <View className='flex-row gap-3 justify-center pt-4'>
-          <Text className='text-[#E8FFD7] '>Already have an account?</Text>
+          <Text className='text-[#3E5F44] text-lg'>Already have an account?</Text>
           <Link href="/sign-in">
-            <Text className='text-[#3E5F44]'>Sign in</Text>
+            <Text className='text-[#3E5F44] text-lg font-medium'>Sign in</Text>
           </Link>
         </View>
       
