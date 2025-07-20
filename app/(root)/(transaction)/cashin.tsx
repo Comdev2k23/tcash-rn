@@ -9,7 +9,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 export default function Cashin() {
   // State management
   const [formData, setFormData] = useState({
-    name: '',
     type: 'cashin',
     refNumber: '',
     amount: ''
@@ -31,7 +30,7 @@ export default function Cashin() {
     if (!userId) return
 
     // Basic validation
-    if (!formData.name.trim() || !formData.refNumber.trim() || !formData.amount.trim()) {
+    if (!formData.refNumber.trim() || !formData.amount.trim()) {
       Alert.alert('Error', 'Please fill all fields')
       return
     }
@@ -46,7 +45,6 @@ export default function Cashin() {
       Alert.alert('Success', 'Transaction saved ✅')
       // Reset form after successful submission
       setFormData({
-        name: '',
         type: 'cashin',
         refNumber: '',
         amount: ''
@@ -80,18 +78,6 @@ export default function Cashin() {
       >
         <View style={styles.innerContainer}>
           <View style={styles.formContainer}>
-            {/* Sender Name Input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Sender Name</Text>
-              <TextInput
-                placeholder="Enter sender's name"
-                value={formData.name}
-                onChangeText={(text) => handleInputChange('name', text)}
-                style={styles.input}
-                placeholderTextColor="#999"
-              />
-            </View>
-
             {/* Reference Number Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Reference Number</Text>
