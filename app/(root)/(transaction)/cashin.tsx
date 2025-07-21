@@ -34,6 +34,7 @@ export default function Cashin() {
       Alert.alert('Error', 'Please fill all fields')
       return
     }
+    
 
     setIsLoading(true)
 
