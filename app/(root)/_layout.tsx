@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Redirect, Tabs } from "expo-router";
-import { House, NotebookPen, ScrollText } from 'lucide-react-native';
+import { FileClock, House, NotebookPen } from 'lucide-react-native';
 
 export default function Layout() {
     const {isSignedIn, isLoaded} = useUser()
@@ -26,7 +26,7 @@ export default function Layout() {
 
            <Tabs.Screen  name="transactions" options={{
             title: "Transactions",
-            tabBarIcon: ({ color }) => <ScrollText size={28}  color={color} />,
+            tabBarIcon: ({ color }) => <FileClock size={28}  color={color} />,
           }}/>
 
           <Tabs.Screen  name="notes" options={{
