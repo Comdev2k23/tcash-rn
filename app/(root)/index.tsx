@@ -1,3 +1,4 @@
+import { SignOutButton } from '@/components/SignOutButton';
 import { SignedIn, useUser } from '@clerk/clerk-expo';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
@@ -54,8 +55,9 @@ export default function Page() {
           </View>
 
           <TouchableOpacity className="bg-emerald-100 p-2 rounded-full">
-            <Text className="text-emerald-800 text-lg">⚙️</Text>
+            <SignOutButton />
           </TouchableOpacity>
+          
         </View>
 
         <View className='flex bg-white mb-6 p-2 rounded-lg shadow'>

@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Redirect, Tabs } from "expo-router";
-import { FileClock, House, NotebookPen } from 'lucide-react-native';
+import { CircleUserRound, FileClock, House, NotebookPen } from 'lucide-react-native';
 
 export default function Layout() {
     const {isSignedIn, isLoaded} = useUser()
@@ -32,6 +32,11 @@ export default function Layout() {
           <Tabs.Screen  name="notes" options={{
             title: "Notes",
             tabBarIcon: ({ color }) => <NotebookPen size={28}  color={color} />,
+          }}/>
+
+          <Tabs.Screen  name="profile" options={{
+            title: "Profile",
+            tabBarIcon: ({ color }) => <CircleUserRound size={28}  color={color} />,
           }}/>
 
           <Tabs.Screen  name="(transaction)" options={{
