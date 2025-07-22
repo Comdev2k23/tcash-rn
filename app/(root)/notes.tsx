@@ -164,7 +164,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
             {/* Notes List */}
             <View style={styles.notesContainer}>
-              <Text style={styles.sectionTitle}>Your Notes</Text>
+              <Text style={styles.sectionTitle}>My Notes</Text>
               {isFetching ? (
                 <Text style={styles.loadingText}>Loading notes...</Text>
               ) : notes.length === 0 ? (
