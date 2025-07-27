@@ -7,7 +7,11 @@
     "icon": "./assets/images/tcash.png",
     "scheme": "tcashrn",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/tcash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E8FFD7"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.comdev2k23.tcash",
@@ -17,32 +21,23 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/tcash.png"
+        "foregroundImage": "./assets/images/tcash.png",
+        "backgroundColor": "#E8FFD7"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.comdev2k23.tcash"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static"
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/tcash.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#E8FFD7"
-        }
-      ]
+      "expo-splash-screen"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "tsconfigPaths": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
         "projectId": "8cc8b752-16ac-4936-be1a-49ad7d7b6e39"
       }
