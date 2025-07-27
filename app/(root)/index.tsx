@@ -1,10 +1,11 @@
 import { SignOutButton } from '@/components/SignOutButton';
 import { SignedIn, useUser } from '@clerk/clerk-expo';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { BanknoteArrowDown, BanknoteArrowUp } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+
 
 type Transaction = {
   id: number;
@@ -67,11 +68,13 @@ export default function Page() {
     }
   }
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
     if (userId) {
       fetchData();
     }
-  }, [userId]);
+  }, [userId])
+  )
 
   const recentTransactions = transactions
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
