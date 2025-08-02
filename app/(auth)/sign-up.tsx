@@ -1,8 +1,7 @@
 import { isClerkAPIResponseError, useSignUp } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -100,63 +99,67 @@ export default function SignUpScreen() {
   }
 
   return (
-   <KeyboardAwareScrollView
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
-      contentContainerStyle={{ flexGrow: 1 }}
-      enableOnAndroid={true}
-      enableAutomaticScroll={true}
-      extraScrollHeight={30}
-   >
+      keyboardVerticalOffset={50}
+    >
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className='flex-1 bg-[#E8FFD7] justify-center p-6'>
+          <View className='items-center mb-8'>
+            <Image 
+              source={require('@/assets/images/signup.png')}
+              className="w-52 h-52 mb-4"
+            />
+            <Text className='text-4xl font-bold text-[#3E5F44]'>Create Account</Text>
+            <Text className='text-[#5E936C] text-lg mt-1'>Sign up to continue</Text>
+          </View>
 
-       <View className='flex-1 bg-[#E8FFD7]  justify-center p-6'>
+          {/* Form */}
+          <View className='space-y-4'>
+            <View className='mt-3'>
+              <TextInput 
+                className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
+                autoCapitalize="none"
+                value={emailAddress}
+                placeholder="Enter email"
+                onChangeText={(email) => setEmailAddress(email)}
+                keyboardType="email-address"
+              />
+            </View>
 
-        <View className='items-center mb-8'>
-          <Image 
-            source={require('@/assets/images/signup.png')}
-            className="w-52 h-52 mb-4"
-          />
-          <Text className='text-4xl font-bold text-[#3E5F44]'>Create Account</Text>
-          <Text className='text-[#5E936C] text-lg mt-1'>Sign up to continue</Text>
+            <View className='mt-6'>
+              <TextInput
+                className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
+                value={password}
+                placeholder="Enter password at least 6 char above"
+                secureTextEntry={true}
+                onChangeText={(password) => setPassword(password)}
+              />
+            </View>
+
+            <TouchableOpacity 
+              onPress={onSignUpPress}
+              className='bg-[#5E936C] p-4 rounded-lg items-center mt-8'
+              disabled={isLoading}
+            >
+              <Text className='text-white text-lg'>
+                {isLoading ? 'Creating Account...' : 'Continue'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className='flex-row gap-3 justify-center pt-4'>
+            <Text className='text-[#3E5F44] text-lg'>Already have an account?</Text>
+            <Link href="/sign-in">
+              <Text className='text-[#3E5F44] text-lg font-medium'>Sign in</Text>
+            </Link>
+          </View>
         </View>
-
-        {/* Form */}
-        <View className='space-y-4'>
-          <View className='mt-3'>
-            <TextInput 
-            className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Enter email"
-            onChangeText={(email) => setEmailAddress(email)}
-            keyboardType="email-address"
-          />
-        </View>
-
-        <View className='mt-6'>
-          <TextInput
-          className='bg-white p-4 rounded-lg text-lg text-[#5E936C] border border-[#93DA97]'
-          value={password}
-          placeholder="Enter password at least 6 char above"
-          secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
-        />
-        </View>
-
-        <TouchableOpacity onPress={onSignUpPress}
-        className='bg-[#5E936C] p-4 rounded-lg items-center mt-8'
-        >
-          <Text className='text-white text-lg'>Continue</Text>
-        </TouchableOpacity>
-        </View>
-
-        <View className='flex-row gap-3 justify-center pt-4'>
-          <Text className='text-[#3E5F44] text-lg'>Already have an account?</Text>
-          <Link href="/sign-in">
-            <Text className='text-[#3E5F44] text-lg font-medium'>Sign in</Text>
-          </Link>
-        </View>
-      
-    </View>
-   </KeyboardAwareScrollView>
-  )
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }

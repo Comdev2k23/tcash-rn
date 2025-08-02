@@ -5,13 +5,15 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function Profile() {
   const [balance, setBalance] = useState('');
@@ -20,7 +22,7 @@ export default function Profile() {
   const { user } = useUser();
   const userId = user?.id;
 
-  const router = useRouter()
+  const router = useRouter();
 
   const updateBalance = async () => {
     if (!balance || isNaN(Number(balance))) {
@@ -34,12 +36,12 @@ export default function Profile() {
         `https://tcash-api.onrender.com/api/users/update-balance`,
         {
           userId: userId,
-          balance: parseFloat(balance), // ✅ fixed key
+          balance: parseFloat(balance),
         }
       );
       Alert.alert('Success', response.data.message);
       setBalance('');
-      router.push('/')
+      router.push('/');
     } catch (error: any) {
       console.error('Error updating balance:', error);
       Alert.alert(
@@ -52,13 +54,15 @@ export default function Profile() {
   };
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.scrollContainer}
-      enableOnAndroid={true}
-      enableAutomaticScroll={true}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
     >
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.card}>
           <TextInput
             style={styles.input}
@@ -84,20 +88,20 @@ export default function Profile() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </KeyboardAwareScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
   },
   container: {
     flex: 1,
     backgroundColor: '#E8FFD7',
-    padding: 20,
-    justifyContent: 'center',
   },
   card: {
     backgroundColor: 'white',

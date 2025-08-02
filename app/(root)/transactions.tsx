@@ -3,7 +3,16 @@ import { FlashList } from '@shopify/flash-list';
 import axios from 'axios';
 import { Trash2Icon } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 type Transaction = {
   id: number,
@@ -50,6 +59,7 @@ export default function Transactions() {
       setFilteredTransactions(response.data);
     } catch (error) {
       console.log('Error Fetching Transactions', error);
+      Alert.alert('Error', 'Failed to fetch transactions');
     }
   };
 
@@ -71,41 +81,40 @@ export default function Transactions() {
     }
   }, [searchQuery, transactions]);
 
+  const handleDelete = async (id: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this transaction?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await axios.delete(`https://tcash-api.onrender.com/api/transactions/delete/${id}`);
+              Alert.alert('Deleted', 'Transaction has been deleted.');
+              fetchData();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete transaction.');
+              console.log('Delete error:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderItem = ({ item }: { item: Transaction }) => {
     const isCashIn = item.type === 'cashin';
     const amountColor = isCashIn ? 'text-red-400' : 'text-[#5E936C]';
     const amountPrefix = isCashIn ? '-' : '+';
 
-
-  async function handleDelete (id:number) {
-     Alert.alert(
-    'Confirm Delete',
-    'Are you sure you want to delete this transaction?',
-    [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await axios.delete(`https://tcash-api.onrender.com/api/transactions/delete/${id}`);
-            Alert.alert('Deleted', 'Transaction has been deleted.');
-            fetchData(); // Refresh the list after deletion
-          } catch (error) {
-            Alert.alert('Error', 'Failed to delete transaction.');
-            console.log('Delete error:', error);
-          }
-        },
-      },
-    ]
-  );
-  }
-
     return (
-      <View className="p-4 mb-2 bg-white  rounded-lg shadow-sm mx-4 border border-gray-100">
+      <View className="p-4 mb-2 bg-white rounded-lg shadow-sm mx-4 border border-gray-100">
         <View className="flex-row justify-between items-center mb-1">
           <Text className="text-[#3E5F44] font-medium">Ref:</Text>
           <Text className="text-[#3E5F44] font-semibold">{item.refnumber}</Text>
@@ -113,7 +122,7 @@ export default function Transactions() {
         <View className="flex-row justify-between items-center mb-1">
           <Text className="text-[#3E5F44] font-medium">Amount:</Text>
           <Text className={`font-bold ${amountColor}`}>
-            {amountPrefix}{Math.abs(Number(item.amount)).toFixed(2)}
+            {amountPrefix}₱{Math.abs(Number(item.amount)).toFixed(2)}
           </Text>
         </View>
         <View className="flex-row justify-between items-center">
@@ -121,10 +130,10 @@ export default function Transactions() {
           <Text className="text-[#5E936C]">{formatDate(item.created_at)}</Text>
         </View>
         <View className="mt-2 flex-row justify-between items-center">
-          <Text className={`text-xs font-medium ${isCashIn ?  'text-red-400' : 'text-[#5E936C]' }`}>
+          <Text className={`text-xs font-medium ${isCashIn ? 'text-red-400' : 'text-[#5E936C]'}`}>
             {isCashIn ? 'Cash In' : 'Cash Out'}
           </Text>
-          <TouchableOpacity onPress={()=> handleDelete(item.id)}>
+          <TouchableOpacity onPress={() => handleDelete(item.id)}>
             <Trash2Icon color={'#3E5F44'} size={20}/>
           </TouchableOpacity>
         </View>
@@ -142,9 +151,13 @@ export default function Transactions() {
   }
 
   return (
-    <View className="flex-1 bg-[#E8FFD7]">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-[#E8FFD7]"
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+    >
       <View className="p-4 shadow-sm">
-        <Text className="text-2xl font-bold text-[#3E5F44] mb-2"> Transactions</Text>
+        <Text className="text-2xl font-bold text-[#3E5F44] mb-2">Transactions</Text>
         <View className="relative">
           <TextInput
             className="bg-white rounded-lg p-3 pl-10 text-gray-800 border border-[#93DA97]"
@@ -152,6 +165,7 @@ export default function Transactions() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             keyboardType='numeric'
+            returnKeyType="search"
           />
           <View className="absolute left-3 top-3">
             <Text className="text-gray-400">🔍</Text>
@@ -162,8 +176,7 @@ export default function Transactions() {
       {filteredTransactions.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           {searchQuery ? (
-            <Text className="text-gray-500">Transaction not yet claimed  </Text>
-            
+            <Text className="text-gray-500">Transaction not yet claimed</Text>
           ) : (
             <Text className="text-gray-500">No transactions found</Text>
           )}
@@ -182,8 +195,9 @@ export default function Transactions() {
           ItemSeparatorComponent={() => <View className="h-3" />}
           ListFooterComponent={() => <View className="h-8" />}
           contentContainerStyle={{ paddingVertical: 16 }}
+          keyboardShouldPersistTaps="handled"
         />
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }

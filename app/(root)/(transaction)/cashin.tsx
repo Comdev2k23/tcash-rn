@@ -1,10 +1,19 @@
-import { useUser } from '@clerk/clerk-expo'
-import { Ionicons } from '@expo/vector-icons'
-import axios from 'axios'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { useUser } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function Cashin() {
   // State management
@@ -12,71 +21,70 @@ export default function Cashin() {
     type: 'cashin',
     refNumber: '',
     amount: ''
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   // User data
-  const { user } = useUser()
-  const userId = user?.id
+  const { user } = useUser();
+  const userId = user?.id;
 
   // Handle form input changes
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   // Submit transaction
   const handleAddTransaction = async () => {
-    if (!userId) return
+    if (!userId) return;
 
     // Basic validation
     if (!formData.refNumber.trim() || !formData.amount.trim()) {
-      Alert.alert('Error', 'Please fill all fields')
-      return
+      Alert.alert('Error', 'Please fill all fields');
+      return;
     }
-    
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       await axios.post(
         `https://tcash-api.onrender.com/api/transactions/new-transaction/${userId}`,
         formData
-      )
-      Alert.alert('Success', 'Transaction saved ✅')
+      );
+      Alert.alert('Success', 'Transaction saved ✅');
       // Reset form after successful submission
       setFormData({
         type: 'cashin',
         refNumber: '',
         amount: ''
-      })
+      });
     } catch (error) {
-      console.error("Error submitting transaction", error)
-      Alert.alert('Error', 'Failed to save transaction. Please try again.')
+      console.error("Error submitting transaction", error);
+      Alert.alert('Error', 'Failed to save transaction. Please try again.');
     } finally {
-      setIsLoading(false)
-      router.push('/')
+      setIsLoading(false);
+      router.push('/');
     }
-  }
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#5E936C" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Cash-In Transaction</Text>
-        {/* Spacer for alignment */}
-        <View style={{ width: 24 }} />
-      </View>
-
-      <KeyboardAwareScrollView
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
-        enableOnAndroid={true}
-        enableAutomaticScroll={true}
-        extraScrollHeight={30}
         keyboardShouldPersistTaps="handled"
       >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#5E936C" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Cash-In Transaction</Text>
+          <View style={{ width: 24 }} />
+        </View>
+
         <View style={styles.innerContainer}>
           <View style={styles.formContainer}>
             {/* Reference Number Input */}
@@ -89,6 +97,7 @@ export default function Cashin() {
                 style={styles.input}
                 placeholderTextColor="#999"
                 keyboardType="numeric"
+                returnKeyType="next"
               />
             </View>
 
@@ -102,6 +111,7 @@ export default function Cashin() {
                 style={styles.input}
                 placeholderTextColor="#999"
                 keyboardType="decimal-pad"
+                returnKeyType="done"
               />
             </View>
 
@@ -117,9 +127,9 @@ export default function Cashin() {
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAwareScrollView>
-    </View>
-  )
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 // Stylesheet
@@ -197,4 +207,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-})
+});
