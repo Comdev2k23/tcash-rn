@@ -8,6 +8,8 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import '../global.css';
 
+import 'dotenv/config';
+
 SplashScreen.preventAutoHideAsync(); // keep splash screen visible
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -25,8 +27,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+
   return (
-    <ClerkProvider tokenCache={tokenCache}>
+    <ClerkProvider 
+    tokenCache={tokenCache}
+    publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    >
       <AuthGate>
         <View style={{ flex: 1 }}>
           <SafeScreen>
