@@ -15,7 +15,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/tcash.png",
         backgroundColor: "#E8FFD7"
       },
       edgeToEdgeEnabled: true,
@@ -24,14 +24,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/tcash.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
+          image: "./assets/images/tcash.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#E8FFD7"
