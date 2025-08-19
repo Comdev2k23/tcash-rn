@@ -79,7 +79,7 @@ export default function SignUpScreen() {
               const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
               if (signUpAttempt.status === 'complete') {
                 await setActive({ session: signUpAttempt.createdSessionId });
-                router.replace('/');
+                router.replace('/(root)');
               }
             } catch (err) {
               handleError(err);
